@@ -1,3 +1,28 @@
-# This file stores configurations for your Shopify app.
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
+name = "remix-app-demo"
+client_id = "f7b5ccd088be28cf195cd160675446bf"
+application_url = "https://breath-saturn-corporations-apache.trycloudflare.com"
+embedded = true
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
 scopes = "write_products"
+
+[auth]
+redirect_urls = [
+  "https://breath-saturn-corporations-apache.trycloudflare.com/auth/callback",
+  "https://breath-saturn-corporations-apache.trycloudflare.com/auth/shopify/callback",
+  "https://breath-saturn-corporations-apache.trycloudflare.com/api/auth/callback",
+  "https://breath-saturn-corporations-apache.trycloudflare.com/.shopify/graphiql/auth/callback"
+]
+
+[webhooks]
+api_version = "2023-10"
+
+[pos]
+embedded = false
+
+[build]
+automatically_update_urls_on_dev = true
+dev_store_url = "muchisx-remix-app-demo.myshopify.com"
