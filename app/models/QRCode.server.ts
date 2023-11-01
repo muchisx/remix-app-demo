@@ -2,7 +2,9 @@ import qrcode from "qrcode";
 import invariant from "tiny-invariant";
 import db from "../db.server";
 
-export async function getQRCode(id, graphql) {
+import type { QRCode } from "@prisma/client";
+
+export async function getQRCode(id: QRCode["id"], graphql) {
   const qrCode = await db.qRCode.findFirst({ where: { id } });
 
   if (!qrCode) {
@@ -12,7 +14,7 @@ export async function getQRCode(id, graphql) {
   return supplementQRCode(qrCode, graphql);
 }
 
-export async function getQRCodes(shop, graphql) {
+export async function getQRCodes(shop: QRCode["shop"], graphql) {
   const qrCodes = await db.qRCode.findMany({
     where: { shop },
     orderBy: { id: "desc" },
@@ -25,23 +27,25 @@ export async function getQRCodes(shop, graphql) {
   );
 }
 
-export function getQRCodeImage(id) {
+export function getQRCodeImage(id: QRCode["id"]) {
   const url = new URL(`/qrcodes/${id}/scan`, process.env.SHOPIFY_APP_URL);
   return qrcode.toDataURL(url.href);
 }
 
-export function getDestinationUrl(qrCode) {
+export function getDestinationUrl(qrCode: QRCode) {
   if (qrCode.destination === "product") {
     return `https://${qrCode.shop}/products/${qrCode.productHandle}`;
   }
 
-  const match = /gid:\/\/shopify\/ProductVariant\/([0-9]+)/.exec(qrCode.productVariantId);
+  const match = /gid:\/\/shopify\/ProductVariant\/([0-9]+)/.exec(
+    qrCode.productVariantId
+  );
   invariant(match, "Unrecognized product variant ID");
 
   return `https://${qrCode.shop}/cart/${match[1]}:1`;
 }
 
-async function supplementQRCode(qrCode, graphql) {
+async function supplementQRCode(qrCode: QRCode, graphql) {
   const qrCodeImagePromise = getQRCodeImage(qrCode.id);
 
   const response = await graphql(
@@ -80,8 +84,18 @@ async function supplementQRCode(qrCode, graphql) {
   };
 }
 
-export function validateQRCode(data) {
-  const errors = {};
+type QRCodeError = {
+  title: string;
+  productId: string;
+  destination: string;
+};
+
+export function validateQRCode(data: QRCode) {
+  const errors: QRCodeError = {
+    title: "",
+    productId: "",
+    destination: "",
+  };
 
   if (!data.title) {
     errors.title = "Title is required";
