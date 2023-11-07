@@ -2,7 +2,7 @@
 
 name = "remix-app-demo"
 client_id = "f7b5ccd088be28cf195cd160675446bf"
-application_url = "https://breath-saturn-corporations-apache.trycloudflare.com"
+application_url = "https://expected-minutes-generate-crops.trycloudflare.com"
 embedded = true
 
 [access_scopes]
@@ -11,10 +11,10 @@ scopes = "write_products"
 
 [auth]
 redirect_urls = [
-  "https://breath-saturn-corporations-apache.trycloudflare.com/auth/callback",
-  "https://breath-saturn-corporations-apache.trycloudflare.com/auth/shopify/callback",
-  "https://breath-saturn-corporations-apache.trycloudflare.com/api/auth/callback",
-  "https://breath-saturn-corporations-apache.trycloudflare.com/.shopify/graphiql/auth/callback"
+  "https://expected-minutes-generate-crops.trycloudflare.com/auth/callback",
+  "https://expected-minutes-generate-crops.trycloudflare.com/auth/shopify/callback",
+  "https://expected-minutes-generate-crops.trycloudflare.com/api/auth/callback",
+  "https://expected-minutes-generate-crops.trycloudflare.com/.shopify/graphiql/auth/callback"
 ]
 
 [webhooks]

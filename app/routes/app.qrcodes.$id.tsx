@@ -89,7 +89,7 @@ export default function QRCodeForm() {
   const navigate = useNavigate();
 
   async function selectProduct() {
-    const products = await window.shopify.resourcePicker({
+    const products = await shopify.resourcePicker({
       type: "product",
       action: "select", // customized action verb, either 'select' or 'add',
     });
@@ -98,9 +98,11 @@ export default function QRCodeForm() {
       const { images, id, variants, title, handle } = products[0];
 
       setFormState({
+        title: "",
+        destination: "",
         ...formState,
         productId: id,
-        productVariantId: variants[0].id,
+        productVariantId: variants[0].id!,
         productTitle: title,
         productHandle: handle,
         productAlt: images[0]?.altText,
@@ -111,21 +113,32 @@ export default function QRCodeForm() {
 
   const submit = useSubmit();
   function handleSave() {
-    const data = {
-      title: formState.title,
-      productId: formState.productId || "",
-      productVariantId: formState.productVariantId || "",
-      productHandle: formState.productHandle || "",
-      destination: formState.destination,
-    };
+    let data;
 
-    setCleanFormState({ ...formState });
+    if (formState && "productId" in formState) {
+      data = {
+        title: formState?.title,
+        productId: formState?.productId || "",
+        productVariantId: formState?.productVariantId || "",
+        productHandle: formState?.productHandle || "",
+        destination: formState?.destination,
+      };
+    } else {
+      data = {
+        title: formState?.title,
+        destination: formState?.destination,
+      };
+    }
+
     submit(data, { method: "post" });
+    setCleanFormState(formState);
   }
+
+  const hasQRCode = qrCode && "id" in qrCode;
 
   return (
     <Page>
-      <ui-title-bar title={qrCode.id ? "Edit QR code" : "Create new QR code"}>
+      <ui-title-bar title={hasQRCode ? "Edit QR code" : "Create new QR code"}>
         <button variant="breadcrumb" onClick={() => navigate("/app")}>
           QR codes
         </button>
@@ -144,7 +157,7 @@ export default function QRCodeForm() {
                   label="title"
                   labelHidden
                   autoComplete="off"
-                  value={formState.title}
+                  value={formState?.title}
                   onChange={(title) => setFormState({ ...formState, title })}
                   error={errors.title}
                 />
@@ -156,13 +169,13 @@ export default function QRCodeForm() {
                   <Text as={"h2"} variant="headingLg">
                     Product
                   </Text>
-                  {formState.productId ? (
+                  {formState && "productId" in formState ? (
                     <Button variant="plain" onClick={selectProduct}>
                       Change product
                     </Button>
                   ) : null}
                 </InlineStack>
-                {formState.productId ? (
+                {formState && "productId" in formState ? (
                   <InlineStack blockAlign="center" gap="500">
                     <Thumbnail
                       source={formState.productImage || ImageMajor}
@@ -198,7 +211,7 @@ export default function QRCodeForm() {
                         value: "cart",
                       },
                     ]}
-                    selected={[formState.destination]}
+                    selected={[formState?.destination || ""]}
                     onChange={(destination) =>
                       setFormState({
                         ...formState,
@@ -207,7 +220,7 @@ export default function QRCodeForm() {
                     }
                     error={errors.destination}
                   />
-                  {qrCode.destinationUrl ? (
+                  {hasQRCode ? (
                     <Button
                       variant="plain"
                       url={qrCode.destinationUrl}
@@ -226,7 +239,7 @@ export default function QRCodeForm() {
             <Text as={"h2"} variant="headingLg">
               QR code
             </Text>
-            {qrCode ? (
+            {hasQRCode ? (
               <EmptyState image={qrCode.image} imageContained={true} />
             ) : (
               <EmptyState image="">
@@ -235,16 +248,16 @@ export default function QRCodeForm() {
             )}
             <BlockStack gap="300">
               <Button
-                disabled={!qrCode?.image}
-                url={qrCode?.image}
+                disabled={!hasQRCode}
+                url={hasQRCode ? qrCode?.image : ""}
                 download
                 variant="primary"
               >
                 Download
               </Button>
               <Button
-                disabled={!qrCode.id}
-                url={`/qrcodes/${qrCode.id}`}
+                disabled={!hasQRCode}
+                url={hasQRCode ? `/qrcodes/${qrCode.id}` : ""}
                 target="_blank"
               >
                 Go to public URL
@@ -258,7 +271,7 @@ export default function QRCodeForm() {
               {
                 content: "Delete",
                 loading: isDeleting,
-                disabled: !qrCode.id || !qrCode || isSaving || isDeleting,
+                disabled: !hasQRCode || !qrCode || isSaving || isDeleting,
                 destructive: true,
                 outline: true,
                 onAction: () =>
