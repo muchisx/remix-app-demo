@@ -1,8 +1,7 @@
+import type { QRCode } from "@prisma/client";
 import qrcode from "qrcode";
 import invariant from "tiny-invariant";
 import db from "../db.server";
-
-import type { QRCode } from "@prisma/client";
 
 export async function getQRCode(id: QRCode["id"], graphql) {
   const qrCode = await db.qRCode.findFirst({ where: { id } });
@@ -84,18 +83,23 @@ async function supplementQRCode(qrCode: QRCode, graphql) {
   };
 }
 
-type QRCodeError = {
+export type QRCodeError = {
+  title?: string;
+  productId?: string;
+  destination?: string;
+};
+
+export type QRCodeFormDataObject = {
+  action: "delete" | "save";
   title: string;
   productId: string;
   destination: string;
+  productHandle: string;
+  productVariantId: string;
 };
 
-export function validateQRCode(data: QRCode) {
-  const errors: QRCodeError = {
-    title: "",
-    productId: "",
-    destination: "",
-  };
+export function validateQRCode(data: QRCodeFormDataObject) {
+  const errors: QRCodeError = {};
 
   if (!data.title) {
     errors.title = "Title is required";
